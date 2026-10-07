@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>古代エジプト神話 神々・魔獣大百科</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet CSS & JS for interactive map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Cinzel & Serif for Ancient/Papyrus Vibe -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Noto+Serif+JP:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Noto Serif JP', serif;
+            background-color: #120e0b;
+            color: #2c221e;
+            overflow-x: hidden;
+        }
+
+        .font-cinzel {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* Papyrus & Parchment Textures */
+        .bg-papyrus {
+            background-color: #f4ebd0;
+            background-image: radial-gradient(#e6d5ab 1px, transparent 0), radial-gradient(#d1be8c 1px, #f4ebd0 100%);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
+
+        .bg-parchment-dark {
+            background: linear-gradient(135deg, #1c1612 0%, #2a201a 50%, #15100c 100%);
+        }
+
+        .bg-card-parchment {
+            background: linear-gradient(145deg, #f7efe1 0%, #ebdcb9 100%);
+            border: 2px solid #c5a059;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Border frame style */
+        .egypt-border {
+            border: 3px double #b8860b;
+            outline: 1px solid #5c4018;
+            outline-offset: -6px;
+        }
+
+        .egypt-gold-glow {
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+        }
+
+        /* Custom Leaflet Map Styles */
+        #map {
+            width: 100%;
+            height: 100%;
+            background-color: #d1be8c;
+            border-radius: 8px;
+        }
+
+        .leaflet-container {
+            background-color: #e5d7b5 !important;
+            font-family: 'Noto Serif JP', serif !important;
+        }
+
+        /* Custom Markers */
+        .custom-map-marker {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid #5c3008;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+            font-size: 16px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+        }
+
+        .custom-map-marker:hover {
+            transform: scale(1.3);
+            z-index: 1000 !important;
+            box-shadow: 0 0 15px #d4af37;
+        }
+
+        .marker-god {
+            background: linear-gradient(135deg, #e6ac00, #997300);
+            color: #fff;
+        }
+
+        .marker-monster {
+            background: linear-gradient(135deg, #a83232, #5c0f0f);
+            color: #fff;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #2a201a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #a37f41;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d4af37;
+        }
+
+        /* Hieroglyphic Decorative Pattern Divider */
+        .hieroglyph-divider {
+            letter-spacing: 0.5em;
+            color: #b8860b;
+            text-align: center;
+            user-select: none;
+            opacity: 0.8;
+        }
+
+        /* Pulsing Region Marker */
+        .region-label-pin {
+            background: rgba(44, 34, 30, 0.85);
+            border: 2px solid #d4af37;
+            color: #f4ebd0;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 12px;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .region-label-pin:hover {
+            background: #d4af37;
+            color: #120e0b;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="bg-parchment-dark text-[#e6d5ab] flex flex-col min-h-screen">
+
+    <header class="border-b-2 border-[#b8860b] bg-[#1a1410] px-4 py-3 sticky top-0 z-50 shadow-2xl">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <span class="text-3xl text-[#d4af37]">𓋹</span>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold font-cinzel text-[#d4af37] tracking-wider egypt-gold-glow">
+                        ANCIENT EGYPT MYTHOLOGY
+                    </h1>
+                    <p class="text-xs text-[#c5a059] font-serif">古代エジプト神話 神々・魔獣インタラクティブ古地図大百科</p>
+                </div>
+            </div>
+
+            <!-- Quick Navigation Controls -->
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="zoomToRegion('all')" class="px-3 py-1.5 text-xs bg-[#2c221e] hover:bg-[#b8860b] hover:text-black border border-[#b8860b] rounded text-[#e6d5ab] transition">
+                    <i class="fa-solid font-cinzel">𓁹</i> 全域表示
+                </button>
+                <button onclick="zoomToRegion('upper')" class="px-3 py-1.5 text-xs bg-[#2c221e] hover:bg-[#b8860b] hover:text-black border border-[#b8860b] rounded text-[#e6d5ab] transition">
+                    上エジプト
+                </button>
+                <button onclick="zoomToRegion('lower')" class="px-3 py-1.5 text-xs bg-[#2c221e] hover:bg-[#b8860b] hover:text-black border border-[#b8860b] rounded text-[#e6d5ab] transition">
+                    下エジプト
+                </button>
+                <button onclick="zoomToRegion('delta')" class="px-3 py-1.5 text-xs bg-[#2c221e] hover:bg-[#b8860b] hover:text-black border border-[#b8860b] rounded text-[#e6d5ab] transition">
+                    ナイル・デルタ
+                </button>
+                <button onclick="zoomToRegion('desert')" class="px-3 py-1.5 text-xs bg-[#2c221e] hover:bg-[#b8860b] hover:text-black border border-[#b8860b] rounded text-[#e6d5ab] transition">
+                    砂漠・オアシス
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-2 md:p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+        <!-- Map & Search Container (Left 8 Cols) -->
+        <section class="lg:col-span-7 xl:col-span-8 flex flex-col gap-3">
+            
+            <!-- Filters & Search Toolbar -->
+            <div class="bg-[#1f1813] border border-[#a37f41] p-3 rounded-lg flex flex-col md:flex-row gap-3 items-center justify-between shadow-lg">
+                <!-- Search Bar -->
+                <div class="relative w-full md:w-64">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-[#a37f41]"></i>
+                    <input type="text" id="searchInput" placeholder="神名・精霊・場所で検索..."
+                        oninput="filterData()"
+                        class="w-full pl-9 pr-3 py-1.5 bg-[#120e0b] border border-[#7a5c29] rounded text-sm text-[#f4ebd0] focus:outline-none focus:border-[#d4af37]">
+                </div>
+
+                <!-- Category Filters -->
+                <div class="flex items-center gap-1 w-full md:w-auto justify-center">
+                    <button onclick="setCategoryFilter('all')" id="btn-cat-all"
+                        class="cat-btn px-3 py-1 text-xs rounded border border-[#d4af37] bg-[#d4af37] text-black font-bold">
+                        すべて (80)
+                    </button>
+                    <button onclick="setCategoryFilter('god')" id="btn-cat-god"
+                        class="cat-btn px-3 py-1 text-xs rounded border border-[#a37f41] bg-[#120e0b] text-[#e6d5ab] hover:border-[#d4af37]">
+                        𓋹 神々 (40)
+                    </button>
+                    <button onclick="setCategoryFilter('monster')" id="btn-cat-monster"
+                        class="cat-btn px-3 py-1 text-xs rounded border border-[#a37f41] bg-[#120e0b] text-[#e6d5ab] hover:border-[#d4af37]">
+                        𓁈 怪物・精霊 (40)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Interactive Map Container -->
+            <div class="relative w-full h-[500px] md:h-[620px] rounded-lg overflow-hidden border-4 border-[#8a682c] shadow-2xl bg-[#e5d7b5]">
+                <div id="map"></div>
+
+                <!-- Map Overlay Title & Decorative Compass -->
+                <div class="absolute top-3 left-3 z-[400] bg-[#1a1410]/85 border border-[#d4af37] p-2 rounded shadow-md pointer-events-none hidden sm:block">
+                    <div class="text-xs text-[#d4af37] font-cinzel font-bold tracking-widest">MAP OF ANCIENT EGYPT</div>
+                    <div class="text-[10px] text-[#c5a059]">古代エジプト地形・霊地図規</div>
+                </div>
+
+                <!-- Legend Overlay -->
+                <div class="absolute bottom-3 right-3 z-[400] bg-[#1a1410]/90 border border-[#b8860b] p-2.5 rounded text-xs shadow-lg space-y-1">
+                    <div class="font-bold text-[#d4af37] text-[11px] mb-1 border-b border-[#5c4018] pb-1">凡例 (Legend)</div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-gradient-to-br from-yellow-500 to-yellow-800 border border-amber-200 inline-block"></span>
+                        <span class="text-[#f4ebd0]">神々 (Gods & Goddesses)</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="w-4 h-4 rounded-full bg-gradient-to-br from-red-600 to-red-950 border border-red-300 inline-block"></span>
+                        <span class="text-[#f4ebd0]">怪物・魔獣 (Monsters & Spirits)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="text-xs text-[#a37f41] text-center italic">
+                <i class="fa-solid fa-hand-pointer mr-1"></i> 地図をドラッグ/ズームしてマーカーまたは地域ピンをタップすると詳細を表示します。
+            </p>
+        </section>
+
+        <!-- Right Side Panel: Entry List & Detail View (Right 4-5 Cols) -->
+        <section class="lg:col-span-5 xl:col-span-4 flex flex-col h-[650px] lg:h-[700px] bg-[#1f1813] border-2 border-[#b8860b] rounded-lg overflow-hidden shadow-2xl">
+            
+            <!-- Side Panel Header Switcher -->
+            <div class="bg-[#140e0a] border-b border-[#a37f41] p-3 flex justify-between items-center">
+                <h2 id="panelTitle" class="text-base font-bold text-[#d4af37] font-cinzel flex items-center gap-2">
+                    <i class="fa-solid fa-book-bookmark text-[#b8860b]"></i> 伝承一覧 (<span id="visibleCount">80</span>)
+                </h2>
+                <button id="btnBackToList" onclick="showListView()" class="hidden px-2.5 py-1 text-xs bg-[#3a2c22] hover:bg-[#b8860b] text-[#f4ebd0] hover:text-black rounded border border-[#a37f41] transition">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> 一覧に戻る
+                </button>
+            </div>
+
+            <!-- View Container 1: Scrollable List View -->
+            <div id="listView" class="flex-1 overflow-y-auto p-3 space-y-2.5">
+                <!-- Dynamic Entry Cards Inserted Here by JS -->
+            </div>
+
+            <!-- View Container 2: Single Detail View -->
+            <div id="detailView" class="hidden flex-1 overflow-y-auto p-4 bg-papyrus text-[#2c221e] relative">
+                <!-- Content generated by JS -->
+            </div>
+        </section>
+    </main>
+
+    <footer class="mt-8 border-t-2 border-[#b8860b] bg-[#140f0c] text-[#a37f41] py-6 px-4">
+        <div class="max-w-7xl mx-auto space-y-4">
+            <div class="text-center font-cinzel text-[#d4af37] text-lg font-bold tracking-widest">
+                𓋹 参考文献・出典資料 (REFERENCES) 𓋹
+            </div>
+            <div class="hieroglyph-divider text-sm">𓀀 𓁐 𓁨 𓃏 𓆣 𓇠 𓈗 𓉔 𓊝 𓋔</div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-[#c5a059] bg-[#1c1612] p-4 rounded border border-[#5c4018]">
+                <div>
+                    <h3 class="font-bold text-[#d4af37] mb-2 border-b border-[#5c4018] pb-1">書籍文献 (Books)</h3>
+                    <ul class="space-y-1.5 list-disc list-inside">
+                        <li>矢島文夫 『エジプトの神話と伝説』 中央公論新社、1998年4月10日、2026年9月24日参照。</li>
+                        <li>松本弥 『古代エジプトの神々事典』 創元社、2002年10月20日、2026年9月24日参照。</li>
+                        <li>リチャード・H・ウィルキンソン 『古代エジプト神々大百科』 東洋書林、2004年9月15日、2026年9月24日参照。</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold text-[#d4af37] mb-2 border-b border-[#5c4018] pb-1">ウェブサイト (Websites)</h3>
+                    <ul class="space-y-1.5 list-disc list-inside">
+                        <li>
+                            GENSO SEKAI 「エジプトの神話 Egypt」 幻想世界神話辞典、2024年2月10日、
+                            <a href="https://jiten.info/dic/Egypt.html" target="_blank" rel="noopener noreferrer" class="underline text-[#d4af37] hover:text-white">https://jiten.info/dic/Egypt.html</a>、2026年9月24日参照。
+                        </li>
+                        <li>
+                            古代エジプトリサーチ会 「エジプト神話の神々と怪物一覧」 エジプト神話ラボ、2023年8月19日、
+                            <a href="https://egypt-myth-lab.com/gods-monsters.html" target="_blank" rel="noopener noreferrer" class="underline text-[#d4af37] hover:text-white">https://egypt-myth-lab.com/gods-monsters.html</a>、2026年9月24日参照。
+                        </li>
+                        <li>
+                            神話世界Navi 「冥界の怪物アメミットと闇の大蛇アペプ」 神話世界Navi、2021年11月5日、
+                            <a href="https://shinwa-navi.jp/egypt/monsters/" target="_blank" rel="noopener noreferrer" class="underline text-[#d4af37] hover:text-white">https://shinwa-navi.jp/egypt/monsters/</a>、2026年9月24日参照。
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="text-center text-[11px] text-[#7a5c29]">
+                &copy; 2026 Ancient Egypt Interactive Encyclopedia & Map Interface. All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const MYTH_DATA = [
+            // ================= 1. 上エジプト地域（Upper Egypt） =================
+            // 怪物 (10)
+            {
+                id: "u_m_1", region: "upper", regionName: "上エジプト", category: "monster", name: "アメミット", enName: "Ammit",
+                location: "テーベ（現代のルクソール）などの死者審判の伝承地", lat: 25.6872, lng: 32.6396,
+                content: "ワニの頭、ライオンの前半身、カバの後半身を持つ悪魔のような怪物。心臓の計量儀式で罪深いと判定された魂を貪り喰らい、永遠の消滅をもたらす。",
+                origin: "死後の世界での不道徳や罪悪に対する恐怖、およびナイル川の危険な肉食動物への恐れから自然発生的に生み出された。"
+            },
+            {
+                id: "u_m_2", region: "upper", regionName: "上エジプト", category: "monster", name: "サグ", enName: "Sag",
+                location: "テーベ近郊の西方砂漠境界域", lat: 25.8000, lng: 32.2000,
+                content: "ライオンの体にタカの頭と翼、ヘビの尾を持つグリフォンに似た合成獣。",
+                origin: "王家の狩猟図や砂漠の未開領域に潜む危険な獣を象徴するために形作られた。"
+            },
+            {
+                id: "u_m_3", region: "upper", regionName: "上エジプト", category: "monster", name: "セパ", enName: "Sepa",
+                location: "アスワンおよび第1カタラクト（急流）周辺", lat: 24.0889, lng: 32.8998,
+                content: "毒を持つ巨大なムカデの姿をした魔獣。時には人間を守る精霊ともされるが、悪霊としての側面も併せ持つ。",
+                origin: "古代エジプト人が恐れた毒虫や害虫被害に対する恐怖から発生した。"
+            },
+            {
+                id: "u_m_4", region: "upper", regionName: "上エジプト", category: "monster", name: "アペプの眷属・スネーク", enName: "Apep's Serpents",
+                location: "デンデラ周辺の地下世界神話の伝承地", lat: 26.1622, lng: 32.6700,
+                content: "火を吐き、死者の魂を閉じ込める巨大な毒蛇の魔物。",
+                origin: "太陽神の夜の航海を阻む闇と破壊の概念が具象化したもの。"
+            },
+            {
+                id: "u_m_5", region: "upper", regionName: "上エジプト", category: "monster", name: "ウヘツ", enName: "Uhets",
+                location: "エドフ周辺", lat: 24.9780, lng: 32.8700,
+                content: "鳥の翼とサソリの尾を持つ不気味な人間型の魔物。夜間に病をもたらす。",
+                origin: "熱病や感染症の原因を説明するために生み出された悪霊。"
+            },
+            {
+                id: "u_m_6", region: "upper", regionName: "上エジプト", category: "monster", name: "ヘテプ・セト", enName: "Hetep-Set",
+                location: "コム・オンボの荒野周辺", lat: 24.4520, lng: 32.9400,
+                content: "セト神に従う赤毛の不吉なハイエナ型の怪物。",
+                origin: "暴風や荒野の脅威を司るセトの勢力を具現化するために誕生した。"
+            },
+            {
+                id: "u_m_7", region: "upper", regionName: "上エジプト", category: "monster", name: "シェスマの処刑人", enName: "Shesmu's Executioners",
+                location: "エスナ周辺", lat: 25.2930, lng: 32.5560,
+                content: "罪人の首を刎ねてその血からワインを搾る血に飢えた怪物・処刑人。",
+                origin: "死後の世界の刑罰や血生臭い生贄儀式の比喩として生じた。"
+            },
+            {
+                id: "u_m_8", region: "upper", regionName: "上エジプト", category: "monster", name: "メシェケン", enName: "Mesheken",
+                location: "アビドス近郊の墓地地帯", lat: 26.1850, lng: 31.9200,
+                content: "墓を荒らす者を病気と呪いで死に至らしめる影のような精霊。",
+                origin: "盗掘者に対する警告と死者の安寧を守るための教訓として語られた。"
+            },
+            {
+                id: "u_m_9", region: "upper", regionName: "上エジプト", category: "monster", name: "ババの悪霊相", enName: "Babi (Evil Aspect)",
+                location: "アスワン周辺", lat: 24.1200, lng: 32.8800,
+                content: "人間を襲い内臓を貪る赤目の凶暴なヒヒの怪物。",
+                origin: "野生ヒヒの攻撃性と人間に対する危険性が恐怖の対象として定着した。"
+            },
+            {
+                id: "u_m_10", region: "upper", regionName: "上エジプト", category: "monster", name: "ペト・セト", enName: "Pet-Set",
+                location: "エル・カブ周辺", lat: 25.1200, lng: 32.7900,
+                content: "火の雨を降らせて集落を襲う炎の鳥の怪物。",
+                origin: "干ばつや激しい日光による被害を擬人化した。"
+            },
+
+            // 神様 (10)
+            {
+                id: "u_g_1", region: "upper", regionName: "上エジプト", category: "god", name: "アモン", enName: "Amun",
+                location: "テーベ（ルクソール）", lat: 25.6997, lng: 32.6396,
+                content: "「隠されたもの」を意味する風と空気の神。のちに太陽神ラーと統合され最高神アモン・ラーとなった。",
+                origin: "宇宙の初期状態である混沌から最初に生じた風の神格として創世された。"
+            },
+            {
+                id: "u_g_2", region: "upper", regionName: "上エジプト", category: "god", name: "オシリス", enName: "Osiris",
+                location: "アビドス", lat: 26.1849, lng: 31.9190,
+                content: "冥界の王であり、植物の再生と死者の復活を司る神。",
+                origin: "大地神ゲブと天空神ヌトの長男として生まれ、弟セトに殺害された後に復活して冥界の王となった。"
+            },
+            {
+                id: "u_g_3", region: "upper", regionName: "上エジプト", category: "god", name: "ホルス", enName: "Horus",
+                location: "エドフ", lat: 24.9785, lng: 32.8734,
+                content: "タカの頭を持つ天空と王権の神。ファラオの守護神。",
+                origin: "オシリスとイシスの間に生まれ、父の復讐を果たしてエジプトの王となった。"
+            },
+            {
+                id: "u_g_4", region: "upper", regionName: "上エジプト", category: "god", name: "ハトホル", enName: "Hathor",
+                location: "デンデラ", lat: 26.1421, lng: 32.6702,
+                content: "雌牛の角と太陽円盤を持つ美、愛、音楽、母性を司る女神。",
+                origin: "太陽神ラーの眼から生まれ、人々に喜びをもたらすために遣わされた。"
+            },
+            {
+                id: "u_g_5", region: "upper", regionName: "上エジプト", category: "god", name: "セベク", enName: "Sobek",
+                location: "コム・オンボ", lat: 24.4524, lng: 32.9288,
+                content: "ワニの頭を持つ水とナイル川の豊穣、軍事力を司る神。",
+                origin: "太古の混沌の水ヌンから現れ、ナイル川の湧出と命の循環を司るために生まれた。"
+            },
+            {
+                id: "u_g_6", region: "upper", regionName: "上エジプト", category: "god", name: "クヌム", enName: "Khnum",
+                location: "エレファンティネ島（アスワン）", lat: 24.0850, lng: 32.8870,
+                content: "ヒツジの頭を持つ創造神。ろくろで粘土から人間と神々を形作った。",
+                origin: "ナイル川の源流を守護し、命の形を創造する神として太古より存在した。"
+            },
+            {
+                id: "u_g_7", region: "upper", regionName: "上エジプト", category: "god", name: "サテト", enName: "Satis",
+                location: "エレファンティネ島（アスワン）", lat: 24.0880, lng: 32.8890,
+                content: "ナイル川の増水を司る弓を持つ狩猟と肥沃の女神。",
+                origin: "クヌムの配偶神として、毎年のナイル川の増水をもたらすために生じた。"
+            },
+            {
+                id: "u_g_8", region: "upper", regionName: "上エジプト", category: "god", name: "ネクベト", enName: "Nekhbet",
+                location: "エル・カブ（ネケブ）", lat: 25.1180, lng: 32.7980,
+                content: "ハゲワシの姿をした上エジプトの守護女神。",
+                origin: "太古の上エジプト王権を護るため、母性の象徴として神格化された。"
+            },
+            {
+                id: "u_g_9", region: "upper", regionName: "上エジプト", category: "god", name: "ムト", enName: "Mut",
+                location: "テーベ", lat: 25.7180, lng: 32.6450,
+                content: "アモンの妃であり、すべての神々の母とされる母性女神。",
+                origin: "テーベの三柱神の一角として、王妃や母性を象徴するために創世された。"
+            },
+            {
+                id: "u_g_10", region: "upper", regionName: "上エジプト", category: "god", name: "コンス", enName: "Khonsu",
+                location: "テーベ", lat: 25.7120, lng: 32.6360,
+                content: "月と時の経過を司る若き神。病を治癒する力を持つ。",
+                origin: "アモンとムトの息子として夜の空を照らすために誕生した。"
+            },
+
+            // ================= 2. 下エジプト地域（Lower Egypt） =================
+            // 怪物 (10)
+            {
+                id: "l_m_1", region: "lower", regionName: "下エジプト", category: "monster", name: "アペプ", enName: "Apep / Apophis",
+                location: "メンフィス周辺および下エジプト全域の夜間神話傳承地", lat: 29.8500, lng: 31.2500,
+                content: "混沌と破壊を象徴する体長数十メートルの巨大な毒蛇。毎夜、太陽船の航海を阻止しようと襲いかかる。",
+                origin: "宇宙の創世の際、光に対抗する闇の勢力として原初の水ヌンから生み出された。"
+            },
+            {
+                id: "l_m_2", region: "lower", regionName: "下エジプト", category: "monster", name: "ウラエウスの火蛇", enName: "Uraeus Flame Serpent",
+                location: "サイス周辺", lat: 30.9650, lng: 30.7700,
+                content: "口から激しい炎を噴き出し、神聖を侵す者を焼き尽くす巨大なコブラの怪物。",
+                origin: "太陽神の目から放たれた聖なる怒りが具象化したもの。"
+            },
+            {
+                id: "l_m_3", region: "lower", regionName: "下エジプト", category: "monster", name: "ケベフ", enName: "Kebeh",
+                location: "ブシリス近郊の湿地帯", lat: 30.9100, lng: 31.2400,
+                content: "湿地帯に潜み、底なし沼に旅人を引きずり込むカエルの顔をした水魔。",
+                origin: "デルタ地帯の危険な泥沼や水難事故に対する恐れから生じた。"
+            },
+            {
+                id: "l_m_4", region: "lower", regionName: "下エジプト", category: "monster", name: "セトの悪霊獣", enName: "Set Animal / Sha",
+                location: "メンフィス近郊の荒野", lat: 29.8000, lng: 31.1500,
+                content: "四角い耳と二股の尾を持つ正体不明の架空の動物。暴風と混乱を引き起こす。",
+                origin: "秩序を脅かす自然災害や混乱の象徴として生成された。"
+            },
+            {
+                id: "l_m_5", region: "lower", regionName: "下エジプト", category: "monster", name: "サ・タ", enName: "Sa-Ta",
+                location: "ヘリオポリスの地下世界伝承地", lat: 30.1300, lng: 31.3200,
+                content: "死者の肉体を喰らうことで永遠の生を得ようとする脚の生えた大蛇の怪物。",
+                origin: "死後の身体の腐敗に対する恐怖から生まれた。"
+            },
+            {
+                id: "l_m_6", region: "lower", regionName: "下エジプト", category: "monster", name: "メルセゲルの異魔相", enName: "Meretseger (Demon Form)",
+                location: "サッカラ周辺", lat: 29.8700, lng: 31.2160,
+                content: "盗掘者の目に砂を流し込んで盲目にするコブラ頭の魔物。",
+                origin: "聖域や王墓を汚す者への報い・罰として語られた。"
+            },
+            {
+                id: "l_m_7", region: "lower", regionName: "下エジプト", category: "monster", name: "シェセム", enName: "Shesem",
+                location: "ギザ周辺の砂丘", lat: 29.9790, lng: 31.1340,
+                content: "砂嵐を起こして行商人を迷わせる砂でできた巨人。",
+                origin: "下エジプトに吹く猛烈な砂嵐の脅威から具象化した。"
+            },
+            {
+                id: "l_m_8", region: "lower", regionName: "下エジプト", category: "monster", name: "カ・アペプ", enName: "Ka-Apep",
+                location: "ブト周辺", lat: 31.3100, lng: 30.7400,
+                content: "アペプの影から生まれた無数の小さな毒蛇の群れ。",
+                origin: "毒蛇の大量発生現象を大蛇アペプの分身として解釈した。"
+            },
+            {
+                id: "l_m_9", region: "lower", regionName: "下エジプト", category: "monster", name: "アク・ペト", enName: "Ak-Pet",
+                location: "アトリビス周辺", lat: 30.4700, lng: 31.1800,
+                content: "暗闇の中で人々の夢に入り込み精神を苛む不気味な影の精霊。",
+                origin: "悪夢や精神の失調を説明するために誕生した。"
+            },
+            {
+                id: "l_m_10", region: "lower", regionName: "下エジプト", category: "monster", name: "ヘテプ・カ", enName: "Hetep-Ka",
+                location: "レトポリス周辺", lat: 30.1200, lng: 31.1600,
+                content: "盲目のまま暴れ回り、出くわすものを噛み殺す巨大なトガリネズミの怪物。",
+                origin: "狂犬病や凶暴化した小動物の脅威から派生した。"
+            },
+
+            // 神様 (10)
+            {
+                id: "l_g_1", region: "lower", regionName: "下エジプト", category: "god", name: "プタハ", enName: "Ptah",
+                location: "メンフィス", lat: 29.8486, lng: 31.2532,
+                content: "職人や建築家の守護神。心で思い言葉に出すことで世界を創造した創世神。",
+                origin: "メンフィス神話において万物の根源として自発的に存在した。"
+            },
+            {
+                id: "l_g_2", region: "lower", regionName: "下エジプト", category: "god", name: "ラー", enName: "Ra",
+                location: "ヘリオポリス", lat: 30.1286, lng: 31.3142,
+                content: "鷹の頭の上に太陽円盤をいただく太陽神。宇宙の秩序と光の主。",
+                origin: "原初の水ヌンから自らの力で出現し、世界と神々を創り出した。"
+            },
+            {
+                id: "l_g_3", region: "lower", regionName: "下エジプト", category: "god", name: "ウアジェト", enName: "Wadjet",
+                location: "ブト（ペ・デプ）", lat: 31.3116, lng: 30.7380,
+                content: "コブラの姿をした下エジプトの守護女神。王権の象徴。",
+                origin: "パピルスの湿地帯で幼いホルスを隠し育て、王家を守るために神格化された。"
+            },
+            {
+                id: "l_g_4", region: "lower", regionName: "下エジプト", category: "god", name: "アトゥム", enName: "Atum",
+                location: "ヘリオポリス", lat: 30.1350, lng: 31.3200,
+                content: "ヘリオポリス創世神話における最初の神。すべての存在の源。",
+                origin: "混沌の丘ベンベンに最初に立ち、自らの体からシュウとテフヌトを生み出した。"
+            },
+            {
+                id: "l_g_5", region: "lower", regionName: "下エジプト", category: "god", name: "セクメト", enName: "Sekhmet",
+                location: "メンフィス", lat: 29.8550, lng: 31.2480,
+                content: "雌ライオンの頭を持つ病と戦争、疫病を司る女神。同時に高い治癒能力も持つ。",
+                origin: "ラーの命を受け、人間に罰を与える「ラーの眼」として生み出された。"
+            },
+            {
+                id: "l_g_6", region: "lower", regionName: "下エジプト", category: "god", name: "ネイト", enName: "Neith",
+                location: "サイス", lat: 30.9630, lng: 30.7680,
+                content: "弓矢を持つ狩猟と戦争、織物を司る極めて古い始原の女神。",
+                origin: "世界が創られる前に原初の水から現れ、自らの織物で世界を覆った。"
+            },
+            {
+                id: "l_g_7", region: "lower", regionName: "下エジプト", category: "god", name: "バステト", enName: "Bastet",
+                location: "ブバスティス", lat: 30.5728, lng: 31.5120,
+                content: "猫の頭を持つ家庭、愛、歓喜、子供の保護者たる優しい女神。",
+                origin: "もとは凶暴なライオン神であったが、平和と豊穣を守る猫の姿へ変化・定着した。"
+            },
+            {
+                id: "l_g_8", region: "lower", regionName: "下エジプト", category: "god", name: "シュウ", enName: "Shu",
+                location: "ヘリオポリス", lat: 30.1400, lng: 31.3100,
+                content: "大気と風を司る神。天（ヌト）と地（ゲブ）を分かつ役割を持つ。",
+                origin: "創世神アトゥムの吐息から誕生した。"
+            },
+            {
+                id: "l_g_9", region: "lower", regionName: "下エジプト", category: "god", name: "テフヌト", enName: "Tefnut",
+                location: "ヘリオポリス", lat: 30.1200, lng: 31.3300,
+                content: "湿気と雨、露を司る雌ライオンの姿の女神。",
+                origin: "創世神アトゥムの唾液からシュウと共に生み出された。"
+            },
+            {
+                id: "l_g_10", region: "lower", regionName: "下エジプト", category: "god", name: "イシス", enName: "Isis",
+                location: "ベフベイト・エル・ハガル（後にはフィラエ島）", lat: 31.0280, lng: 31.2820,
+                content: "魔法と母性、復活の強い力を持つ女神。オシリスの妻。",
+                origin: "ゲブとヌトの間に生まれ、知恵と魔法を用いて夫オシリスを復活させた。"
+            },
+
+            // ================= 3. ナイル川・デルタ地帯（Nile & Delta Region） =================
+            // 怪物 (10)
+            {
+                id: "d_m_1", region: "delta", regionName: "ナイル・デルタ", category: "monster", name: "ネヘブカウの狂乱相", enName: "Nehebkau (Frenzied Aspect)",
+                location: "デルタ東部湿地帯", lat: 30.8500, lng: 31.8000,
+                content: "無数の足をもち死者の魂を縛り上げる蛇の怪物。正義の味方となる前は凶暴な悪魔とされる。",
+                origin: "ナイル川の氾濫期に現れる不気味な水生生物や蛇の恐怖から生じた。"
+            },
+            {
+                id: "d_m_2", region: "delta", regionName: "ナイル・デルタ", category: "monster", name: "ハピの悪霊", enName: "Hapi's Shadows",
+                location: "ナイル川中流の渦潮地帯", lat: 27.2000, lng: 31.1800,
+                content: "川底に引きずり込んで溺死させる水死者の怨霊。",
+                origin: "水難事故や急流での流失事故を説明するために伝承された。"
+            },
+            {
+                id: "d_m_3", region: "delta", regionName: "ナイル・デルタ", category: "monster", name: "アマル・ナイル", enName: "Amal-Nile",
+                location: "デルタ中央部", lat: 30.9000, lng: 31.1000,
+                content: "カバの巨体とウナギの滑りやすさを併せ持つ河川の怪物。漁師の網を破壊する。",
+                origin: "漁師たちの作業障害や川の中の巨大生物への恐れから生まれた。"
+            },
+            {
+                id: "d_m_4", region: "delta", regionName: "ナイル・デルタ", category: "monster", name: "ウガ・ペト", enName: "Uga-Pet",
+                location: "デルタ西部の芦原", lat: 31.1000, lng: 30.4000,
+                content: "人間の声で叫び、誘い寄せた者を沼に落とす不味い肉を持つ鳥の怪物。",
+                origin: "湿地帯の夜鳥の鳴き声や未知の音に対する恐怖から生まれた。"
+            },
+            {
+                id: "d_m_5", region: "delta", regionName: "ナイル・デルタ", category: "monster", name: "セベク・カ", enName: "Sobek-Ka",
+                location: "デルタ南部の川岸", lat: 30.2000, lng: 31.2500,
+                content: "人間をひと呑みにする黒い超巨大ワニ。",
+                origin: "通常のワニよりも遥かに大きい個体への畏怖が怪異化した。"
+            },
+            {
+                id: "d_m_6", region: "delta", regionName: "ナイル・デルタ", category: "monster", name: "シェ・ヌン", enName: "She-Nun",
+                location: "ナイル支流の汽水域", lat: 31.4000, lng: 30.8000,
+                content: "水を腐敗させ、飲んだものに病をもたらすヘドロの精霊。",
+                origin: "氾濫後の水質汚染や伝染病の流行を可視化した。"
+            },
+            {
+                id: "d_m_7", region: "delta", regionName: "ナイル・デルタ", category: "monster", name: "メト・ラ", enName: "Met-Ra",
+                location: "デルタ東部国境沿い", lat: 30.9500, lng: 32.1000,
+                content: "炎を背負って川面を滑るように走る光るコブラ。",
+                origin: "湿地帯のセントエルモの火や不知火現象から派生した。"
+            },
+            {
+                id: "d_m_8", region: "delta", regionName: "ナイル・デルタ", category: "monster", name: "ババ・ヌン", enName: "Baba-Nun",
+                location: "デルタ北端の沿岸地帯", lat: 31.5500, lng: 31.1000,
+                content: "海から川へ逆流してくる巨大な赤イカの怪物。",
+                origin: "地中海から入ってくる未知の海洋生物への驚異から生じた。"
+            },
+            {
+                id: "d_m_9", region: "delta", regionName: "ナイル・デルタ", category: "monster", name: "ケベ・セト", enName: "Kebeh-Set",
+                location: "デルタ中央の農耕地帯", lat: 30.7000, lng: 31.0000,
+                content: "一夜にして畑作物を食い荒らすイナゴの群れを率いる人面イナゴの怪物。",
+                origin: "周期的に発生するイナゴの大発生（飛蝗）を害虫の悪魔として描いた。"
+            },
+            {
+                id: "d_m_10", region: "delta", regionName: "ナイル・デルタ", category: "monster", name: "ペト・ヌン", enName: "Pet-Nun",
+                location: "デルタ地帯の河口付近", lat: 31.4500, lng: 30.3500,
+                content: "霧とともに現れ、船の舵を狂わせる霧の悪霊。",
+                origin: "濃霧による船の座礁事故を防ぐための警戒から生じた。"
+            },
+
+            // 神様 (10)
+            {
+                id: "d_g_1", region: "delta", regionName: "ナイル・デルタ", category: "god", name: "ハピ", enName: "Hapi",
+                location: "ナイル川全域（特にアスワンおよびデルタ地域）", lat: 28.0000, lng: 30.8000,
+                content: "ナイル川の氾濫とそれももたらす豊かな恵みを象徴する神。大きな腹を持つ男の姿。",
+                origin: "毎年エジプトに肥沃な土壌をもたらす氾濫現象そのものを神格化した。"
+            },
+            {
+                id: "d_g_2", region: "delta", regionName: "ナイル・デルタ", category: "god", name: "ウアジェト（デルタ総括）", enName: "Wadjet (Delta Realm)",
+                location: "デルタ地帯全域", lat: 31.0000, lng: 31.2000,
+                content: "土地の肥沃と王家の繁栄を守るコブラ神。",
+                origin: "デルタ地帯の豊かなパピルス畑の守護者として誕生した。"
+            },
+            {
+                id: "d_g_3", region: "delta", regionName: "ナイル・デルタ", category: "god", name: "ヘケト", enName: "Heqet",
+                location: "デルタ地域のハーヌフル周辺", lat: 30.6500, lng: 31.3500,
+                content: "カエルの頭を持つ出産と生命の復活を司る女神。",
+                origin: "氾濫後に何百万匹ものカエルが一斉に生まれる姿から、生命誕生の象徴となった。"
+            },
+            {
+                id: "d_g_4", region: "delta", regionName: "ナイル・デルタ", category: "god", name: "バネブジェド", enName: "Banebdjedet",
+                location: "メンデス（デルタ東部）", lat: 30.9600, lng: 31.5200,
+                content: "オスヒツジの頭を持つ力と豊穣の神。オシリスの魂の宿り主とされる。",
+                origin: "生命力あふれる家畜（オスの羊）の繁栄力を神聖視して誕生した。"
+            },
+            {
+                id: "d_g_5", region: "delta", regionName: "ナイル・デルタ", category: "god", name: "タウエレト", enName: "Taweret",
+                location: "ナイル川沿いの集落全域", lat: 26.8000, lng: 31.5000,
+                content: "立ち上がったカバの姿をし、妊婦や子供を守る母性の保護神。",
+                origin: "我が子を守るカバの凶暴性と強さを命の守護として利用するために崇拝された。"
+            },
+            {
+                id: "d_g_6", region: "delta", regionName: "ナイル・デルタ", category: "god", name: "ベス", enName: "Bes",
+                location: "下エジプト全域の庶民住居", lat: 30.0000, lng: 31.4000,
+                content: "舌を突き出した醜い小人の神。踊りと音楽で悪霊を払い、家庭や出産を守る。",
+                origin: "魔除けの護符や庶民の日常的な守護者として自然発生した。"
+            },
+            {
+                id: "d_g_7", region: "delta", regionName: "ナイル・デルタ", category: "god", name: "ソプドゥ（デルタ）", enName: "Shed / Sopdu",
+                location: "デルタ東部国境付近", lat: 30.8000, lng: 32.2500,
+                content: "アジア方面からの侵略を防ぐ動乱と東方国境の守護神。",
+                origin: "外敵の侵入が頻発した東部国境を守るための軍事神として形成された。"
+            },
+            {
+                id: "d_g_8", region: "delta", regionName: "ナイル・デルタ", category: "god", name: "ネヘブカウ", enName: "Nehebkau",
+                location: "デルタ全域", lat: 30.5000, lng: 30.9000,
+                content: "死者の魂に「カ（生命力）」を与えて保護する蛇神。",
+                origin: "古い荒ぶる蛇神が、死後の世界の有益な保護者として変化・定着した。"
+            },
+            {
+                id: "d_g_9", region: "delta", regionName: "ナイル・デルタ", category: "god", name: "メルセゲル", enName: "Meretseger",
+                location: "ナイル川沿いの墓地地帯", lat: 25.7300, lng: 32.6000,
+                content: "「静寂を愛する者」を意味する、墓地を守護するコブラの女神。",
+                origin: "墓の平穏を守り、聖域を乱す者を懲らしめるために作られた。"
+            },
+            {
+                id: "d_g_10", region: "delta", regionName: "ナイル・デルタ", category: "god", name: "メスヘネト", enName: "Meskhenet",
+                location: "デルタ地域の出産儀礼地", lat: 30.7500, lng: 31.2500,
+                content: "出産の場面に立ち会い、赤ん坊の運命を定める女神。",
+                origin: "出産という命がけの瞬間と運命の決定を司る存在として神格化された。"
+            },
+
+            // ================= 4. 砂漠・オアシス・外縁地域（Desert & Oasis Region） =================
+            // 怪物 (10)
+            {
+                id: "o_m_1", region: "desert", regionName: "砂漠・オアシス", category: "monster", name: "グリフォン", enName: "Egyptian Gryphon",
+                location: "西部砂漠の広大な未開地", lat: 28.5000, lng: 28.0000,
+                content: "タカの頭とライオンの体、蛇の尾を持つ。砂漠で邪悪な存在を狩るとされる。",
+                origin: "遠方の未開地に対する幻想と強力な野生動物の融合によって生まれた。"
+            },
+            {
+                id: "o_m_2", region: "desert", regionName: "砂漠・オアシス", category: "monster", name: "カイチ・サハラ", enName: "Khait-Sahara",
+                location: "シナイ半島および東部砂漠", lat: 29.5000, lng: 33.8000,
+                content: "夜間の砂丘に姿を現し、遠征隊のラクダや人間を奪う砂の影。",
+                origin: "苛酷な砂漠の夜間環境での遭難や失踪事件から語られた。"
+            },
+            {
+                id: "o_m_3", region: "desert", regionName: "砂漠・オアシス", category: "monster", name: "セトの蠍魔", enName: "Scorpions of Set",
+                location: "西部オアシス（バハレイヤ・ダクラなど）周辺", lat: 28.3500, lng: 28.9000,
+                content: "人間ほどの大きさを持つ巨大な黒サソリ。刺された者は即座に発狂して死ぬ。",
+                origin: "砂漠に生息する強力な毒サソリへの恐れが肥大化した。"
+            },
+            {
+                id: "o_m_4", region: "desert", regionName: "砂漠・オアシス", category: "monster", name: "サ・セト", enName: "Sa-Set",
+                location: "シナイ半島の鉱山地帯", lat: 29.0000, lng: 33.3000,
+                content: "赤い毛に覆われた人食い男。岩の陰に隠れて採掘者を襲う。",
+                origin: "過酷な労働環境での落盤事故や外敵の襲撃が怪物化された。"
+            },
+            {
+                id: "o_m_5", region: "desert", regionName: "砂漠・オアシス", category: "monster", name: "ウ・メラ", enName: "U-Mera",
+                location: "スエズ湾沿岸", lat: 29.2000, lng: 32.6000,
+                content: "熱風に乗って飛来し、オアシスの水源を乾かしてしまう炎の悪霊。",
+                origin: "砂漠の熱風（カムシン）による水源枯渇現象の擬人化。"
+            },
+            {
+                id: "o_m_6", region: "desert", regionName: "砂漠・オアシス", category: "monster", name: "ヘテプ・ヌン", enName: "Hetep-Nun",
+                location: "西部砂漠の大砂海", lat: 26.5000, lng: 26.0000,
+                content: "幻影のオアシスを見せて旅人を誘い込み、砂の中に落とす妖魔。",
+                origin: "砂漠特有の「蜃気楼」によって命を落とす危険への警鐘。"
+            },
+            {
+                id: "o_m_7", region: "desert", regionName: "砂漠・オアシス", category: "monster", name: "メル・ペト", enName: "Mer-Pet",
+                location: "南部ヌビア国境地帯", lat: 22.5000, lng: 31.5000,
+                content: "翼を持ち夜間空から降り立って血を吸う巨大なコウモリの怪物。",
+                origin: "吸血動物や夜の闇に対する恐怖が融合して発生した。"
+            },
+            {
+                id: "o_m_8", region: "desert", regionName: "砂漠・オアシス", category: "monster", name: "バ・アペプ", enName: "Ba-Apep",
+                location: "西部砂漠のクフラ地帯", lat: 25.0000, lng: 27.5000,
+                content: "アペプの憤怒から生まれた、全身が溶岩のように熱い巨大トカゲ。",
+                origin: "火のように熱い砂漠の岩場とトカゲの姿を組み合わせて誕生。"
+            },
+            {
+                id: "o_m_9", region: "desert", regionName: "砂漠・オアシス", category: "monster", name: "ケベ・セシュ", enName: "Kebeh-Sesh",
+                location: "シナイ山脈の谷間", lat: 28.5500, lng: 33.9500,
+                content: "岩を崩して登山者を押し潰す山男の姿をした怪物。",
+                origin: "山岳地帯の崩落事故や滑落事故への恐怖から生まれた。"
+            },
+            {
+                id: "o_m_10", region: "desert", regionName: "砂漠・オアシス", category: "monster", name: "アク・サハラ", enName: "Ak-Sahara",
+                location: "砂漠全域の流砂地帯", lat: 27.5000, lng: 29.5000,
+                content: "地下に口を開け、通過するものを一気に呑み込む大地の悪魔。",
+                origin: "突然足元が崩れる流砂の危険性を表現した。"
+            },
+
+            // 神様 (10)
+            {
+                id: "o_g_1", region: "desert", regionName: "砂漠・オアシス", category: "god", name: "セト", enName: "Set",
+                location: "オムボス（ナカダ）および西部オアシス全域", lat: 25.9800, lng: 32.7200,
+                content: "砂漠、嵐、異邦人、混乱を司る強力な神。オシリスの弟。",
+                origin: "アフリカの過酷な砂漠の力と激しい嵐を具象化して神格化した。"
+            },
+            {
+                id: "o_g_2", region: "desert", regionName: "砂漠・オアシス", category: "god", name: "アヌビス", enName: "Anubis",
+                location: "キノポリス（犬の町）および砂漠墓地全域", lat: 28.3500, lng: 30.7800,
+                content: "ジャッカルの頭を持つミイラ作りの神。死者の魂を冥界へ導く。",
+                origin: "砂漠の墓地周辺を徘徊するジャッカルの姿から、死者を見守る神として生まれた。"
+            },
+            {
+                id: "o_g_3", region: "desert", regionName: "砂漠・オアシス", category: "god", name: "ウプウアウト", enName: "Wepwawet",
+                location: "アシウト（アスユート）", lat: 27.1800, lng: 31.1800,
+                content: "白いジャッカルまたは狼の頭を持つ「道を切り開く者」たる戦神。",
+                origin: "王や軍隊の先頭に立ち、未知の砂漠や戦場で勝利へ導く神として誕生した。"
+            },
+            {
+                id: "o_g_4", region: "desert", regionName: "砂漠・オアシス", category: "god", name: "セルケト", enName: "Serket",
+                location: "砂漠境界域および全域", lat: 25.5000, lng: 31.5000,
+                content: "頭の上にサソリを乗せた、毒虫の害から人間を守り呼吸を助ける女神。",
+                origin: "致命的な毒を持つサソリを逆に対象の守護として味方につけるために崇拝された。"
+            },
+            {
+                id: "o_g_5", region: "desert", regionName: "砂漠・オアシス", category: "god", name: "ハルポクラテス", enName: "Harpocrates",
+                location: "砂漠オアシス地帯", lat: 25.4500, lng: 30.5500,
+                content: "幼子ホルスのギリシア・エジプト的姿。秘密と沈黙、オアシスの恵みを司る。",
+                origin: "湿地帯で隠れ育ったホルスの幼少期が守護神として再解釈された。"
+            },
+            {
+                id: "o_g_6", region: "desert", regionName: "砂漠・オアシス", category: "god", name: "アシュ", enName: "Ash",
+                location: "西部砂漠およびリビア砂漠のオアシス", lat: 27.0000, lng: 27.9000,
+                content: "砂漠とオアシス、および西方の外国人たちを統括する古い砂漠神。",
+                origin: "エジプト西方の砂漠住民や貿易路を守護する神として古代より存在した。"
+            },
+            {
+                id: "o_g_7", region: "desert", regionName: "砂漠・オアシス", category: "god", name: "ソプドゥ（砂漠）", enName: "Sopdu (Desert Aspect)",
+                location: "シナイ半島および東部砂漠", lat: 28.9000, lng: 33.2000,
+                content: "アジア方面からの敵を防ぎ、シナイの鉱山を守る鋭い刃を持つ神。",
+                origin: "ターコイズや銅の採掘遠征隊を守護する目的で祀られた。"
+            },
+            {
+                id: "o_g_8", region: "desert", regionName: "砂漠・オアシス", category: "god", name: "ゲブ", enName: "Geb",
+                location: "砂漠および大地全域", lat: 26.0000, lng: 30.0000,
+                content: "大地そのものを象徴する神。身体の起伏が山や砂丘となった。",
+                origin: "シュウとテフヌトの間に生まれ、天空神ヌトと対をなす存在として創世された。"
+            },
+            {
+                id: "o_g_9", region: "desert", regionName: "砂漠・オアシス", category: "god", name: "ヌト", enName: "Nut",
+                location: "全域（夜空が見渡せる砂漠地帯）", lat: 24.5000, lng: 29.0000,
+                content: "身体を折り曲げて世界を覆う天空の女神。星々と太陽を呑み込み再誕させる。",
+                origin: "大地神ゲブの上に立ち、宇宙の屋根を形作るために創世された。"
+            },
+            {
+                id: "o_g_10", region: "desert", regionName: "砂漠・オアシス", category: "god", name: "イムホテプ（神格化）", enName: "Imhotep",
+                location: "サッカラ（砂漠縁の墓地地帯）", lat: 29.8710, lng: 31.2165,
+                content: "階段ピラミッドを設計した実在の建築家・医者が神格化された、医学と知恵の神。",
+                origin: "偉大な業績と知恵への崇敬から、死後に神の領域へ昇格した。"
+            }
+        ];
+
+        let map;
+        let markers = [];
+        let activeCategory = 'all';
+        let activeRegion = 'all';
+
+        // Region Bounds & Center Map Configurations
+        const REGION_BOUNDS = {
+            all: { center: [27.5, 30.5], zoom: 6 },
+            upper: { center: [25.2, 32.5], zoom: 8 },
+            lower: { center: [30.3, 31.2], zoom: 9 },
+            delta: { center: [31.0, 31.2], zoom: 8.5 },
+            desert: { center: [27.0, 28.5], zoom: 7 }
+        };
+
+        window.onload = function() {
+            initMap();
+            renderList(MYTH_DATA);
+        };
+
+        function initMap() {
+            // Base map centered on Egypt
+            map = L.map('map', {
+                center: [27.5, 30.8],
+                zoom: 6,
+                minZoom: 5,
+                maxZoom: 12
+            });
+
+            // Ancient Papyrus Tinted Map Tile Layer (Stamen/Esri Parchment style fallback)
+            L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Ancient Egypt Map Engine',
+                maxZoom: 12
+            }).addTo(map);
+
+            // Draw Nile River Polygon/Line to emphasize ancient geography
+            const nilePath = [
+                [24.0, 32.9], [24.5, 32.9], [25.0, 32.8], [25.7, 32.6], 
+                [26.2, 32.0], [26.8, 31.5], [28.0, 30.8], [29.8, 31.2], 
+                [30.1, 31.3], [30.2, 31.2]
+            ];
+            L.polyline(nilePath, {
+                color: '#3b7a9e',
+                weight: 5,
+                opacity: 0.7,
+                smoothFactor: 1
+            }).addTo(map);
+
+            // Delta Fan Illustration Overlay Lines
+            const deltaLeft = [[30.2, 31.2], [30.8, 30.4], [31.4, 30.3]];
+            const deltaRight = [[30.2, 31.2], [30.8, 31.8], [31.5, 32.2]];
+            L.polyline(deltaLeft, { color: '#3b7a9e', weight: 4, opacity: 0.7 }).addTo(map);
+            L.polyline(deltaRight, { color: '#3b7a9e', weight: 4, opacity: 0.7 }).addTo(map);
+
+            // Add Region Center Labels to Map
+            const regionsInfo = [
+                { name: "𓉐 上エジプト (Upper Egypt)", lat: 25.3, lng: 32.7, id: "upper" },
+                { name: "𓉐 下エジプト (Lower Egypt)", lat: 30.1, lng: 31.0, id: "lower" },
+                { name: "𓈗 ナイル・デルタ (Delta)", lat: 31.1, lng: 31.1, id: "delta" },
+                { name: "1 砂漠・オアシス (Desert)", lat: 27.2, lng: 28.0, id: "desert" }
+            ];
+
+            regionsInfo.forEach(r => {
+                const labelIcon = L.divIcon({
+                    className: 'region-label-pin',
+                    html: `<span>${r.name}</span>`,
+                    iconSize: [120, 28]
+                });
+                const m = L.marker([r.lat, r.lng], { icon: labelIcon }).addTo(map);
+                m.on('click', () => zoomToRegion(r.id));
+            });
+
+            // Populate Item Markers
+            updateMarkers(MYTH_DATA);
+        }
+
+        function updateMarkers(data) {
+            // Clear existing markers
+            markers.forEach(m => map.removeLayer(m));
+            markers = [];
+
+            data.forEach(item => {
+                const isGod = item.category === 'god';
+                const iconSymbol = isGod ? '𓋹' : '𓁈';
+                const cssClass = isGod ? 'marker-god' : 'marker-monster';
+
+                const customIcon = L.divIcon({
+                    className: `custom-map-marker ${cssClass}`,
+                    html: `<span>${iconSymbol}</span>`,
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                });
+
+                const marker = L.marker([item.lat, item.lng], { icon: customIcon });
+                
+                // Tooltip
+                marker.bindTooltip(`<b>${item.name}</b><br><span style="font-size:10px;">${item.location}</span>`, {
+                    direction: 'top',
+                    offset: [0, -10]
+                });
+
+                // Click event -> Select and Show Detail
+                marker.on('click', () => {
+                    selectItem(item.id);
+                });
+
+                marker.addTo(map);
+                markers.push(marker);
+            });
+        }
+
+        function filterData() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+
+            const filtered = MYTH_DATA.filter(item => {
+                const matchesCat = (activeCategory === 'all') || (item.category === activeCategory);
+                const matchesReg = (activeRegion === 'all') || (item.region === activeRegion);
+                const matchesSearch = query === '' || 
+                    item.name.toLowerCase().includes(query) ||
+                    item.enName.toLowerCase().includes(query) ||
+                    item.location.toLowerCase().includes(query) ||
+                    item.content.toLowerCase().includes(query);
+
+                return matchesCat && matchesReg && matchesSearch;
+            });
+
+            renderList(filtered);
+            updateMarkers(filtered);
+            document.getElementById('visibleCount').innerText = filtered.length;
+        }
+
+        function setCategoryFilter(cat) {
+            activeCategory = cat;
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.classList.remove('bg-[#d4af37]', 'text-black', 'font-bold');
+                btn.classList.add('bg-[#120e0b]', 'text-[#e6d5ab]');
+            });
+
+            const activeBtn = document.getElementById(`btn-cat-${cat}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-[#120e0b]', 'text-[#e6d5ab]');
+                activeBtn.classList.add('bg-[#d4af37]', 'text-black', 'font-bold');
+            }
+
+            filterData();
+        }
+
+        function zoomToRegion(regionKey) {
+            activeRegion = regionKey;
+            const target = REGION_BOUNDS[regionKey] || REGION_BOUNDS.all;
+            map.flyTo(target.center, target.zoom, { duration: 1.2 });
+            filterData();
+        }
+
+        function renderList(data) {
+            const listEl = document.getElementById('listView');
+            listEl.innerHTML = '';
+
+            if (data.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center text-[#a37f41] py-12">
+                        <i class="fa-solid fa-scroll text-3xl mb-2"></i>
+                        <p class="text-sm">該当する伝承は見つかりませんでした。</p>
+                    </div>
+                `;
+                return;
+            }
+
+            data.forEach(item => {
+                const isGod = item.category === 'god';
+                const tagBg = isGod ? 'bg-amber-900/60 text-amber-300 border-amber-600' : 'bg-red-950/60 text-red-300 border-red-700';
+                const catName = isGod ? '神' : '怪物・精霊';
+
+                const card = document.createElement('div');
+                card.className = 'bg-[#18120e] hover:bg-[#281f18] border border-[#7a5c29] p-3 rounded cursor-pointer transition flex justify-between items-start group';
+                card.onclick = () => selectItem(item.id);
+
+                card.innerHTML = `
+                    <div class="space-y-1 pr-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs px-2 py-0.5 rounded border ${tagBg} font-mono">${catName}</span>
+                            <span class="text-xs text-[#a37f41]"><i class="fa-solid fa-location-dot text-[10px]"></i> ${item.regionName}</span>
+                        </div>
+                        <h3 class="font-bold text-[#f4ebd0] group-hover:text-[#d4af37] text-sm transition">
+                            ${item.name} <span class="text-xs text-[#a37f41] font-cinzel">(${item.enName})</span>
+                        </h3>
+                        <p class="text-xs text-[#c5a059] line-clamp-1">${item.location}</p>
+                    </div>
+                    <div class="text-[#a37f41] group-hover:text-[#d4af37] pt-1">
+                        <i class="fa-solid fa-chevron-right text-xs"></i>
+                    </div>
+                `;
+
+                listEl.appendChild(card);
+            });
+        }
+
+        function selectItem(itemId) {
+            const item = MYTH_DATA.find(d => d.id === itemId);
+            if (!item) return;
+
+            // Pan map to marker
+            map.flyTo([item.lat, item.lng], Math.max(map.getZoom(), 8), { duration: 1.0 });
+
+            // Switch Panel View
+            document.getElementById('listView').classList.add('hidden');
+            const detailEl = document.getElementById('detailView');
+            detailEl.classList.remove('hidden');
+            document.getElementById('btnBackToList').classList.remove('hidden');
+
+            const isGod = item.category === 'god';
+            const catBadge = isGod 
+                ? '<span class="px-2.5 py-1 bg-amber-800 text-amber-100 rounded text-xs font-bold border border-amber-500">𓋹 神様 (Deity)</span>'
+                : '<span class="px-2.5 py-1 bg-red-900 text-red-100 rounded text-xs font-bold border border-red-500">𓁈 怪物・魔獣 (Monster/Spirit)</span>';
+
+            detailEl.innerHTML = `
+                <div class="egypt-border p-4 bg-card-parchment rounded shadow-lg text-[#2c221e]">
+                    
+                    <!-- Header Badges & Names -->
+                    <div class="border-b-2 border-[#b8860b] pb-3 mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            ${catBadge}
+                            <span class="text-xs font-bold text-[#7a5c29] bg-[#e6d5ab] px-2 py-0.5 rounded border border-[#b8860b]">
+                                ${item.regionName}
+                            </span>
+                        </div>
+                        <h2 class="text-2xl font-bold text-[#422d17] font-cinzel mb-1">
+                            ${item.name}
+                        </h2>
+                        <div class="text-sm font-cinzel text-[#8c622d] tracking-wider font-semibold">
+                            ${item.enName}
+                        </div>
+                    </div>
+
+                    <!-- Location Box -->
+                    <div class="mb-4 bg-[#ede0c2] p-2.5 rounded border border-[#c5a059] flex items-start gap-2">
+                        <i class="fa-solid fa-map-location-dot text-[#b8860b] mt-0.5"></i>
+                        <div>
+                            <div class="text-[11px] font-bold text-[#8c622d]">伝承地・主な聖域</div>
+                            <div class="text-xs font-bold text-[#2c221e]">${item.location}</div>
+                        </div>
+                    </div>
+
+                    <!-- Details Content -->
+                    <div class="space-y-4 text-xs leading-relaxed">
+                        <div>
+                            <h4 class="font-bold text-sm text-[#5c3008] border-b border-[#c5a059] pb-1 mb-1.5 flex items-center gap-1.5">
+                                <span>𓁹</span> 概要と特徴
+                            </h4>
+                            <p class="text-[#3a2c22] bg-white/50 p-2.5 rounded border border-[#d8c49e]">
+                                ${item.content}
+                            </p>
+                        </div>
+
+                        <div>
+                            <h4 class="font-bold text-sm text-[#5c3008] border-b border-[#c5a059] pb-1 mb-1.5 flex items-center gap-1.5">
+                                <span>𓆣</span> 誕生経緯・神話的背景
+                            </h4>
+                            <p class="text-[#3a2c22] bg-white/50 p-2.5 rounded border border-[#d8c49e]">
+                                ${item.origin}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Hieroglyphic Footer Motif -->
+                    <div class="mt-6 text-center text-[#b8860b] text-sm tracking-widest user-select-none">
+                        𓋹 𓀀 𓁨 𓃏 𓆣 𓋹
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('panelTitle').innerHTML = `<i class="fa-solid fa-scroll text-[#b8860b]"></i> 神話詳細`;
+        }
+
+        function showListView() {
+            document.getElementById('detailView').classList.add('hidden');
+            document.getElementById('listView').classList.remove('hidden');
+            document.getElementById('btnBackToList').classList.add('hidden');
+            document.getElementById('panelTitle').innerHTML = `<i class="fa-solid fa-book-bookmark text-[#b8860b]"></i> 伝承一覧 (<span id="visibleCount">${MYTH_DATA.length}</span>)`;
+            filterData();
+        }
+    </script>
+</body>
+</html>
